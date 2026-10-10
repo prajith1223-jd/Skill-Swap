@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log In · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.social-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:13px}
+.social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.btn-social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;transition:background .15s,box-shadow .15s;cursor:pointer}
+.btn-social:hover{background:#f8f8ff;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.btn-social img{width:20px;height:20px}
+
+</style>
+</head>
+<body>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><img src="assets/logo.svg" class="icon" alt="Logo"> SkillSwap</div>
+      <div class="auth-sub">Log in to continue exchanging skills.</div>
+
+      <div class="error-box" id="error-box"></div>
+
+      <!-- Social login buttons -->
+      <button class="btn-social" id="google-btn" onclick="googleLogin()">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+        Continue with Google
+      </button>
+
+
+      <div class="social-divider">or sign in with email</div>
+
+      <form id="login-form">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required autocomplete="username">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-block" id="submit-btn">Log In</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html" style="color:var(--accent);font-weight:700;">Sign up</a>
+      </div>
+
+
+    </div>
+  </div>
+
+
+
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script>
+    if (sessionStorage.getItem('skillswap_token')) location.href = 'dashboard.html';
+
+    const form = document.getElementById('login-form');
+    const errorBox = document.getElementById('error-box');
+    const submitBtn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Logging in...';
+      try {
+        const { token, user } = await api('/auth/login', {
+          method: 'POST',
+          body: { email: document.getElementById('email').value.trim(), password: document.getElementById('password').value }
+        });
+        saveSession(token, user);
+        location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
+      } catch (err) {
+        errorBox.textContent = err.message;
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log In';
+      }
+    });
+
+    // ── Google OAuth ─────────────────────────────────────────────────────────
+    function googleLogin() {
+      sessionStorage.setItem('oauth_flow', 'login');
+      // Redirect directly to backend OAuth endpoint
+      window.location.href = 'http://localhost:5000/api/auth/google';
+    }
+
+
+  </script>
+</body>
+</html>

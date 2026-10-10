@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="admin">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>Admin Panel</h1>
+          <p>Manage users, skills, and platform activity</p>
+        </div>
+      </div>
+
+      <div class="grid-4" id="admin-stats">
+        <div class="loading">Loading stats...</div>
+      </div>
+
+      <div class="tabs mt-24">
+        <div class="tab active" data-panel="users">Users</div>
+        <div class="tab" data-panel="skills">Skills</div>
+        <div class="tab" data-panel="requests">Requests</div>
+        <div class="tab" data-panel="sessions">Sessions</div>
+        <div class="tab" data-panel="reviews">Reviews</div>
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div id="admin-panel-content"><div class="loading">Loading...</div></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

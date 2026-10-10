@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="dashboard">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1 id="greeting">Welcome back!</h1>
+          <p>Here's what's happening with your skill exchanges.</p>
+        </div>
+        <a class="btn" href="browse-skills.html">+ Offer a Skill</a>
+      </div>
+
+      <div class="grid-4" id="stats-grid">
+        <div class="loading">Loading stats...</div>
+      </div>
+
+      <div class="grid-2 mt-24" style="gap: 24px;">
+        <div class="card">
+          <div class="flex justify-between items-center">
+            <h3 style="margin:0;">Recent Requests</h3>
+            <a href="requests.html" class="text-muted" style="font-size:13px;">View all &rarr;</a>
+          </div>
+          <div id="recent-requests" class="mt-16">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="flex justify-between items-center">
+            <h3 style="margin:0;">Recommended Matches</h3>
+            <a href="browse-skills.html" class="text-muted" style="font-size:13px;">Browse all &rarr;</a>
+          </div>
+          <div id="recommended-matches" class="mt-16">
+            <div class="loading">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="js/socket-client.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

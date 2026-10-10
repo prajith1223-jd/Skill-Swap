@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.settings-grid{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start}
+.settings-nav{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;position:sticky;top:20px}
+.settings-nav-item{display:flex;align-items:center;gap:12px;padding:13px 18px;font-size:14px;font-weight:600;color:var(--text-muted);cursor:pointer;transition:background .15s,color .15s;border-left:3px solid transparent}
+.settings-nav-item:hover{background:var(--bg);color:var(--text)}
+.settings-nav-item.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.settings-panel{display:none}
+.settings-panel.active{display:block}
+.settings-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);padding:24px;margin-bottom:20px}
+.settings-section h3{margin:0 0 4px;font-size:17px}
+.settings-section .sec-sub{color:var(--text-muted);font-size:13.5px;margin:0 0 20px}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none;padding-bottom:0}
+.setting-row .sr-label{font-size:14px;font-weight:600}
+.setting-row .sr-sub{font-size:12.5px;color:var(--text-muted);margin-top:2px}
+
+/* Toggle switch */
+.toggle{position:relative;display:inline-block;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:24px;transition:.3s}
+.slider:before{position:absolute;content:'';height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+.toggle input:checked + .slider{background:var(--accent)}
+.toggle input:checked + .slider:before{transform:translateX(20px)}
+
+/* Theme color swatches */
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:4px}
+.theme-card{border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;text-align:center}
+.theme-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.theme-card.selected{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light)}
+.theme-swatch{width:100%;height:40px;border-radius:8px;margin-bottom:8px}
+.theme-name{font-size:12.5px;font-weight:700;color:var(--text)}
+.theme-card .check{display:none;font-size:16px;color:var(--accent)}
+.theme-card.selected .check{display:block}
+
+/* Font size slider */
+.font-slider{-webkit-appearance:none;width:100%;height:6px;border-radius:4px;background:var(--border);outline:none}
+.font-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer}
+.font-preview{font-size:var(--preview-size,15px);color:var(--text);margin-top:12px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+
+/* Language select */
+.lang-select{border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:14px;width:100%;background:white;outline:none}
+.lang-select:focus{border-color:var(--accent)}
+
+@media(max-width:768px){.settings-grid{grid-template-columns:1fr}.settings-nav{position:static;display:flex;overflow-x:auto}.settings-nav-item{white-space:nowrap;border-left:none;border-bottom:3px solid transparent}.settings-nav-item.active{border-bottom-color:var(--accent);border-left:none}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <aside id="sidebar-slot"></aside>
+  <main class="main">
+    <div id="topbar-slot"></div>
+
+    <div class="page-head">
+      <div>
+        <h1>⚙️ Settings</h1>
+        <p>Manage your preferences, appearance, and account.</p>
+      </div>
+    </div>
+
+    <div class="settings-grid">
+      <!-- Left nav -->
+      <div class="settings-nav">
+        <div class="settings-nav-item active" onclick="showPanel('appearance')">🎨 Appearance</div>
+        <div class="settings-nav-item" onclick="showPanel('account')">👤 Account</div>
+        <div class="settings-nav-item" onclick="showPanel('notifications-pref')">🔔 Notifications</div>
+        <div class="settings-nav-item" onclick="showPanel('privacy')">🔒 Privacy</div>
+        <div class="settings-nav-item" onclick="showPanel('language')">🌐 Language & Region</div>
+        <div class="settings-nav-item" onclick="showPanel('danger')">⚠️ Danger Zone</div>
+      </div>
+
+      <!-- Right panels -->
+      <div>
+
+        <!-- ── APPEARANCE ── -->
+        <div class="settings-panel active" id="panel-appearance">
+
+          <!-- Theme colours -->
+          <div class="settings-section">
+            <h3>🎨 Theme Color</h3>
+            <p class="sec-sub">Choose an accent color for the entire app.</p>
+            <div class="theme-grid" id="theme-grid"></div>
+          </div>
+
+          <!-- Dark / Light mode -->
+          <div class="settings-section">
+            <h3>🌙 Color Mode</h3>
+            <p class="sec-sub">Switch between light, dark, and auto mode.</p>
+            <div class="setting-row">
+              <div><div class="sr-label">Dark Mode</div><div class="sr-sub">Use dark background throughout the app</div></div>
+              <label class="toggle"><input type="checkbox" id="dark-toggle" onchange="applyDarkMode(this.checked)"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="sr-label">Use System Preference</div><div class="sr-sub">Follow your device's dark/light setting</div></div>
+              <label class="toggle"><input type="checkbox" id="system-toggle" onchange="applySystemMode(this.checked)"><span class="slider"></span></label>
+            </div>
+          </div>
+
+          <!-- Font size -->
+          <div class="settings-section">
+            <h3>🔤 Font Size</h3>
+            <p class="sec-sub">Adjust the base text size.</p>
+            <input type="range" class="font-slider" min="12" max="20" value="14" id="font-slider" oninput="changeFontSize(this.value)">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-top:6px"><span>Small</span><span id="font-val">14px</span><span>Large</span></div>
+            <div class="font-preview" id="font-preview">The quick brown fox jumps over the lazy dog. SkillSwap helps you exchange skills with people worldwide.</div>
+          </div>
+
+          <!-- Sidebar style -->
+          <div class="settings-section">
+            <h3>📐 Layout</h3>
+            <p class="sec-sub">Customize the sidebar and layout style.</p>
+            <div class="setting-row">
+              <div><div class="sr-label">Compact Sidebar</div><div class="sr-sub">Show icons only in the sidebar</div></div>
+              <label class="toggle"><input type="checkbox" id="compact-toggle" onchange="savePrefs()"><span class="slider"></span></label>
+            </div>
+            <div class="setting-row">
+              <div><div class="sr-label">Rounded Cards</div><div class="sr-sub">Use more rounded corners on cards</div></div>
+              <label class="toggle"><input type="checkbox" id="rounded-toggle" checked onchange="applyRounded(this.checked)"><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ACCOUNT ── -->
+        <div class="settings-panel" id="panel-account">
+          <div class="settings-section">
+            <h3>👤 Profile Information</h3>
+            <p class="sec-sub">Update your name, bio and avatar.</p>
+            <div class="field"><label>Full Name</label><input type="text" id="acc-name" placeholder="Your name"></div>
+            <div class="field"><label>Bio</label><textarea id="acc-bio" rows="3" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;resize:vertical" placeholder="Tell people about yourself..."></textarea></div>
+            <div class="field"><label>Avatar URL</label><input type="text" id="acc-avatar" placeholder="https://..."></div>
+            <div class="field"><label>WhatsApp Number</label><input type="text" id="acc-phone" placeholder="+1234567890"></div>
+            <div class="flex gap-12 mt-16">
+              <button class="btn" onclick="saveProfile()">Save Changes</button>
+              <button class="btn btn-outline" onclick="loadProfile()">Undo</button>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>🔑 Change Password</h3>
+            <p class="sec-sub">Use a strong password of at least 8 characters.</p>
+            <div class="field"><label>Current Password</label><input type="password" id="cur-pass" placeholder="Current password"></div>
+            <div class="field"><label>New Password</label><input type="password" id="new-pass" placeholder="New password"></div>
+            <div class="field"><label>Confirm New Password</label><input type="password" id="conf-pass" placeholder="Repeat new password"></div>
+            <button class="btn" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+
+        <!-- ── NOTIFICATIONS ── -->
+        <div class="settings-panel" id="panel-notifications-pref">
+          <div class="settings-section">
+            <h3>🔔 Notification Preferences</h3>
+            <p class="sec-sub">Choose what you want to be notified about.</p>
+            <div class="setting-row"><div><div class="sr-label">New Exchange Requests</div><div class="sr-sub">When someone requests your skill</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Request Status Updates</div><div class="sr-sub">When your request is accepted or rejected</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">New Messages</div><div class="sr-sub">When you receive a direct message</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">New Reviews</div><div class="sr-sub">When someone leaves you a review</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Session Reminders</div><div class="sr-sub">Reminders before scheduled sessions</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Browser Push Notifications</div><div class="sr-sub">Show notifications in your browser</div></div><label class="toggle"><input type="checkbox" id="push-toggle" onchange="requestPushPermission(this.checked)"><span class="slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- ── PRIVACY ── -->
+        <div class="settings-panel" id="panel-privacy">
+          <div class="settings-section">
+            <h3>🔒 Privacy Settings</h3>
+            <p class="sec-sub">Control who can see your profile and contact you.</p>
+            <div class="setting-row"><div><div class="sr-label">Public Profile</div><div class="sr-sub">Anyone can view your profile and skills</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Show Email Address</div><div class="sr-sub">Display email on your public profile</div></div><label class="toggle"><input type="checkbox" onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Allow Direct Messages</div><div class="sr-sub">Let any user send you a message</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+            <div class="setting-row"><div><div class="sr-label">Show Online Status</div><div class="sr-sub">Let others see when you're online</div></div><label class="toggle"><input type="checkbox" checked onchange="savePrefs()"><span class="slider"></span></label></div>
+          </div>
+        </div>
+
+        <!-- ── LANGUAGE ── -->
+        <div class="settings-panel" id="panel-language">
+          <div class="settings-section">
+            <h3>🌐 Language & Region</h3>
+            <p class="sec-sub">Set your preferred language and time format.</p>
+            <div class="field">
+              <label>App Language</label>
+              <select class="lang-select" id="app-lang" onchange="savePrefs()">
+                <option value="en">🇬🇧 English</option>
+                <option value="hi">🇮🇳 Hindi</option>
+                <option value="ta">🇮🇳 Tamil</option>
+                <option value="es">🇪🇸 Spanish</option>
+                <option value="fr">🇫🇷 French</option>
+                <option value="de">🇩🇪 German</option>
+                <option value="ja">🇯🇵 Japanese</option>
+                <option value="ar">🇸🇦 Arabic</option>
+                <option value="zh">🇨🇳 Chinese</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Time Format</label>
+              <select class="lang-select" id="time-format" onchange="savePrefs()">
+                <option value="12h">12-hour (2:30 PM)</option>
+                <option value="24h">24-hour (14:30)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Date Format</label>
+              <select class="lang-select" id="date-format" onchange="savePrefs()">
+                <option value="dmy">DD/MM/YYYY</option>
+                <option value="mdy">MM/DD/YYYY</option>
+                <option value="ymd">YYYY-MM-DD</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── DANGER ZONE ── -->
+        <div class="settings-panel" id="panel-danger">
+          <div class="settings-section" style="border-color:#fca5a5">
+            <h3 style="color:var(--danger)">⚠️ Danger Zone</h3>
+            <p class="sec-sub">These actions are permanent and cannot be undone.</p>
+            <div class="setting-row">
+              <div><div class="sr-label">Clear All Data</div><div class="sr-sub">Remove all your skills, requests and messages</div></div>
+              <button class="btn btn-danger btn-sm" onclick="if(confirm('This will delete all your data. Are you sure?')) alert('Feature coming soon.')">Clear Data</button>
+            </div>
+            <div class="setting-row">
+              <div><div class="sr-label" style="color:var(--danger)">Delete Account</div><div class="sr-sub">Permanently delete your account and all data</div></div>
+              <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete your account permanently? This cannot be undone.')) alert('Feature coming soon.')">Delete Account</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/api.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/auth-guard.js"></script>
+<script src="js/layout.js"></script>
+<script>
+  renderLayout('settings');
+
+  // ── Theme definitions ──────────────────────────────────────────────────────
+  const THEMES = [
+    { id: 'purple',   name: 'Purple (Default)', accent: '#6c5ce7', dark: '#5b4bd1', light: '#ece9fd', sidebar: '#171335', sidebarL: '#201c47' },
+    { id: 'blue',     name: 'Ocean Blue',        accent: '#2563eb', dark: '#1d4ed8', light: '#dbeafe', sidebar: '#0f172a', sidebarL: '#1e3a5f' },
+    { id: 'teal',     name: 'Teal',              accent: '#0d9488', dark: '#0f766e', light: '#ccfbf1', sidebar: '#042f2e', sidebarL: '#134e4a' },
+    { id: 'green',    name: 'Forest Green',      accent: '#16a34a', dark: '#15803d', light: '#dcfce7', sidebar: '#052e16', sidebarL: '#14532d' },
+    { id: 'rose',     name: 'Rose Pink',         accent: '#e11d48', dark: '#be123c', light: '#ffe4e6', sidebar: '#1f0a0f', sidebarL: '#4c0519' },
+    { id: 'orange',   name: 'Sunset Orange',     accent: '#ea580c', dark: '#c2410c', light: '#ffedd5', sidebar: '#1c0a00', sidebarL: '#431407' },
+    { id: 'indigo',   name: 'Indigo',            accent: '#4f46e5', dark: '#4338ca', light: '#e0e7ff', sidebar: '#1e1b4b', sidebarL: '#312e81' },
+    { id: 'cyan',     name: 'Sky Cyan',          accent: '#0284c7', dark: '#0369a1', light: '#e0f2fe', sidebar: '#082f49', sidebarL: '#0c4a6e' },
+    { id: 'violet',   name: 'Violet',            accent: '#7c3aed', dark: '#6d28d9', light: '#ede9fe', sidebar: '#2e1065', sidebarL: '#4c1d95' },
+    { id: 'slate',    name: 'Dark Slate',        accent: '#475569', dark: '#334155', light: '#f1f5f9', sidebar: '#0f172a', sidebarL: '#1e293b' },
+  ];
+
+  // ── Build theme swatches ───────────────────────────────────────────────────
+  function buildThemeGrid() {
+    const saved = sessionStorage.getItem('skillswap_theme') || 'purple';
+    const grid = document.getElementById('theme-grid');
+    grid.innerHTML = THEMES.map(t => `
+      <div class="theme-card ${t.id === saved ? 'selected' : ''}" onclick="applyTheme('${t.id}')" id="tc-${t.id}">
+        <div class="theme-swatch" style="background:linear-gradient(135deg,${t.sidebar},${t.accent})"></div>
+        <div class="theme-name">${t.name}</div>
+        <div class="check">✓ Selected</div>
+      </div>
+    `).join('');
+  }
+
+  function applyTheme(id) {
+    const t = THEMES.find(x => x.id === id);
+    if (!t) return;
+    const root = document.documentElement;
+    root.style.setProperty('--accent', t.accent);
+    root.style.setProperty('--accent-dark', t.dark);
+    root.style.setProperty('--accent-light', t.light);
+    root.style.setProperty('--sidebar-bg', t.sidebar);
+    root.style.setProperty('--sidebar-bg-light', t.sidebarL);
+    sessionStorage.setItem('skillswap_theme', id);
+    // Update cards selection
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('tc-' + id)?.classList.add('selected');
+    showToast('Theme changed to ' + t.name, 'success');
+  }
+
+  // ── Dark mode ──────────────────────────────────────────────────────────────
+  function applyDarkMode(on) {
+    document.documentElement.style.setProperty('--bg', on ? '#0f1117' : '#f5f5fb');
+    document.documentElement.style.setProperty('--card', on ? '#1a1d27' : '#ffffff');
+    document.documentElement.style.setProperty('--text', on ? '#e8e8f0' : '#1f1b3a');
+    document.documentElement.style.setProperty('--text-muted', on ? '#8b8aaa' : '#6b6884');
+    document.documentElement.style.setProperty('--border', on ? '#2d2f45' : '#e7e5f3');
+    sessionStorage.setItem('skillswap_dark', on ? '1' : '0');
+    savePrefs();
+  }
+
+  function applySystemMode(on) {
+    if (on) {
+      const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyDarkMode(dark);
+      document.getElementById('dark-toggle').checked = dark;
+    }
+    savePrefs();
+  }
+
+  // ── Font size ──────────────────────────────────────────────────────────────
+  function changeFontSize(val) {
+    document.documentElement.style.fontSize = val + 'px';
+    document.getElementById('font-val').textContent = val + 'px';
+    document.getElementById('font-preview').style.fontSize = val + 'px';
+    sessionStorage.setItem('skillswap_font', val);
+  }
+
+  // ── Rounded ───────────────────────────────────────────────────────────────
+  function applyRounded(on) {
+    document.documentElement.style.setProperty('--radius', on ? '14px' : '6px');
+    sessionStorage.setItem('skillswap_rounded', on ? '1' : '0');
+  }
+
+  // ── Push notifications ────────────────────────────────────────────────────
+  function requestPushPermission(on) {
+    if (on && 'Notification' in window) {
+      Notification.requestPermission().then(p => {
+        if (p !== 'granted') {
+          document.getElementById('push-toggle').checked = false;
+          showToast('Permission denied for notifications', 'error');
+        } else {
+          showToast('Push notifications enabled!', 'success');
+        }
+      });
+    }
+  }
+
+  // ── Panel nav ─────────────────────────────────────────────────────────────
+  function showPanel(id) {
+    document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('panel-' + id)?.classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // ── Account ───────────────────────────────────────────────────────────────
+  async function loadProfile() {
+    try {
+      const user = await api('/auth/me');
+      document.getElementById('acc-name').value = user.name || '';
+      document.getElementById('acc-bio').value = user.bio || '';
+      document.getElementById('acc-avatar').value = user.avatar_url || '';
+      document.getElementById('acc-phone').value = user.phone_number || '';
+    } catch(e) {}
+  }
+
+  async function saveProfile() {
+    try {
+      let oldProfile = null;
+      try { oldProfile = await api('/users/me'); } catch(e){}
+
+      await api('/users/me', { method: 'PUT', body: {
+        name: document.getElementById('acc-name').value.trim(),
+        bio: document.getElementById('acc-bio').value.trim(),
+        avatar_url: document.getElementById('acc-avatar').value.trim(),
+        phone_number: document.getElementById('acc-phone').value.trim()
+      }});
+
+      let undoCallback = null;
+      if (oldProfile) {
+        undoCallback = async () => {
+          try {
+            await api('/users/me', { method: 'PUT', body: oldProfile });
+            showToast('Profile restored', 'success');
+            loadProfile();
+          } catch (e) {}
+        };
+      }
+
+      showToast('Profile updated!', 'success', undoCallback);
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  async function changePassword() {
+    const cur = document.getElementById('cur-pass').value;
+    const nw  = document.getElementById('new-pass').value;
+    const cn  = document.getElementById('conf-pass').value;
+    if (nw !== cn) { showToast('New passwords do not match', 'error'); return; }
+    if (nw.length < 4) { showToast('Password must be at least 4 characters', 'error'); return; }
+    try {
+      await api('/users/me/password', { method: 'PUT', body: { currentPassword: cur, newPassword: nw }});
+      showToast('Password changed successfully!', 'success');
+      ['cur-pass','new-pass','conf-pass'].forEach(id => document.getElementById(id).value = '');
+    } catch(e) { showToast(e.message, 'error'); }
+  }
+
+  // ── Save prefs ─────────────────────────────────────────────────────────────
+  function savePrefs() {
+    // Preferences are saved to sessionStorage immediately via individual handlers
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  buildThemeGrid();
+  loadProfile();
+
+  // Restore saved preferences
+  const savedTheme = sessionStorage.getItem('skillswap_theme');
+  if (savedTheme) applyTheme(savedTheme);
+
+  const savedDark = sessionStorage.getItem('skillswap_dark');
+  if (savedDark) {
+    const on = savedDark === '1';
+    document.getElementById('dark-toggle').checked = on;
+    applyDarkMode(on);
+  }
+
+  const savedFont = sessionStorage.getItem('skillswap_font');
+  if (savedFont) {
+    document.getElementById('font-slider').value = savedFont;
+    changeFontSize(savedFont);
+  }
+
+  const savedRounded = sessionStorage.getItem('skillswap_rounded');
+  if (savedRounded !== null) {
+    const on = savedRounded === '1';
+    document.getElementById('rounded-toggle').checked = on;
+    applyRounded(on);
+  }
+</script>
+</body>
+</html>

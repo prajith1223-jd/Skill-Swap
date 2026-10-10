@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="profile">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>My Profile</h1>
+          <p>Manage your public profile and account settings</p>
+        </div>
+      </div>
+
+      <div class="grid-3" style="grid-template-columns: 320px 1fr;">
+        <div class="card" style="text-align:center;">
+          <img id="profile-avatar" class="avatar-lg" src="" alt="">
+          <h3 id="profile-name" class="mt-16" style="margin-bottom:2px;"></h3>
+          <div class="text-muted" id="profile-email"></div>
+          <div class="mt-16" id="profile-rating"></div>
+          <div class="mt-16 flex gap-8" id="profile-socials" style="justify-content:center; align-items:center;"></div>
+          <div class="tag-row mt-16" id="profile-badges" style="justify-content:center;"></div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-top:0;">Edit Profile</h3>
+          <form id="profile-form">
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" id="edit-name" required>
+            </div>
+            <div class="field">
+              <label>Avatar Photo</label>
+              <input type="file" id="edit-avatar-file" accept="image/*">
+            </div>
+            <div class="field">
+              <label>Bio</label>
+              <textarea id="edit-bio" rows="3" placeholder="Tell people about yourself..."></textarea>
+            </div>
+            
+            <h4 style="margin-top:20px;margin-bottom:12px;color:var(--text-muted)">Social Links</h4>
+            <div class="field">
+              <label>Public Gmail</label>
+              <input type="email" id="edit-gmail" placeholder="you@gmail.com">
+            </div>
+            <div class="field">
+              <label>GitHub URL</label>
+              <input type="url" id="edit-github" placeholder="https://github.com/yourusername">
+            </div>
+            <div class="field">
+              <label>LinkedIn URL</label>
+              <input type="url" id="edit-linkedin" placeholder="https://linkedin.com/in/yourusername">
+            </div>
+
+            <div class="flex gap-12 mt-16">
+              <button type="submit" class="btn">Save Changes</button>
+              <button type="button" class="btn btn-outline" onclick="loadProfile()">Undo</button>
+            </div>
+          </form>
+
+          <hr style="border:none; border-top:1px solid var(--border); margin: 24px 0;">
+
+          <h3 style="margin-top:0;">Change Password</h3>
+          <form id="password-form">
+            <div class="field">
+              <label>Current Password</label>
+              <input type="password" id="current-password" required>
+            </div>
+            <div class="field">
+              <label>New Password</label>
+              <input type="password" id="new-password" required>
+            </div>
+            <button type="submit" class="btn btn-outline">Update Password</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card mt-24">
+        <h3 style="margin-top:0;">My Skills</h3>
+        <div class="grid-3" id="my-skills"><div class="loading">Loading...</div></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/profile.js"></script>
+</body>
+</html>

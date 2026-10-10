@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sessions · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── Meet badge ─────────────────────────────────────────────────────── */
+.meet-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #e8f5e9; color: #1e7e34;
+  border: 1px solid #a5d6a7; border-radius: 8px;
+  padding: 5px 12px; font-size: 12.5px; font-weight: 700;
+}
+.meet-badge img { width: 15px; height: 15px; }
+
+/* ── Meet panel inside card ─────────────────────────────────────────── */
+.meet-panel {
+  margin-top: 14px; padding: 14px;
+  background: linear-gradient(135deg, #f0fdf4, #e8f5e9);
+  border: 1px solid #a5d6a7; border-radius: 12px;
+}
+.meet-panel .meet-title {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 700; font-size: 14px; color: #166534; margin-bottom: 10px;
+}
+.meet-panel .meet-url {
+  background: white; border: 1px solid #a5d6a7; border-radius: 8px;
+  padding: 8px 12px; font-size: 12.5px; color: #166534;
+  font-family: monospace; word-break: break-all; margin-bottom: 10px;
+}
+.btn-meet {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #1a73e8; color: white; border: none;
+  padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 13.5px;
+  cursor: pointer; transition: background .15s; text-decoration: none;
+}
+.btn-meet:hover { background: #1557b0; }
+.btn-gcal {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: white; color: #1a73e8; border: 1.5px solid #1a73e8;
+  padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 13.5px;
+  cursor: pointer; transition: all .15s; text-decoration: none;
+}
+.btn-gcal:hover { background: #e8f0fe; }
+.btn-gen-meet {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; color: #555; border: 1.5px solid var(--border);
+  padding: 7px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: all .15s;
+}
+.btn-gen-meet:hover { border-color: #1a73e8; color: #1a73e8; }
+
+/* ── Countdown chip ─────────────────────────────────────────────────── */
+.countdown-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+  border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 700;
+}
+.countdown-chip.soon { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+.countdown-chip.live { background: #dcfce7; color: #166534; border-color: #86efac; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+/* ── Schedule modal ─────────────────────────────────────────────────── */
+.modal-box input[type="datetime-local"] {
+  width:100%; padding:11px 14px; border:1.5px solid var(--border);
+  border-radius:10px; font-size:14px; outline:none;
+}
+.modal-box input[type="datetime-local"]:focus { border-color: var(--accent); }
+
+/* Jitsi Modal */
+#jitsi-modal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+#jitsi-container {
+  width: 90%; height: 80%; background: #000; border-radius: 12px; overflow: hidden;
+}
+#close-jitsi-btn {
+  margin-top: 16px; background: #e53935; color: white; padding: 10px 20px; border-radius: 8px;
+  font-weight: bold; cursor: pointer; border: none;
+}
+</style>
+<script src="https://meet.jit.si/external_api.js"></script>
+</head>
+<body data-page="sessions">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>📅 Sessions</h1>
+          <p>Manage your scheduled skill exchange sessions and video calls</p>
+        </div>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="tabs" style="margin-bottom:20px">
+        <button class="tab active" onclick="filterSessions('all',this)">All</button>
+        <button class="tab" onclick="filterSessions('upcoming',this)">🟢 Upcoming</button>
+        <button class="tab" onclick="filterSessions('completed',this)">✅ Completed</button>
+        <button class="tab" onclick="filterSessions('cancelled',this)">❌ Cancelled</button>
+      </div>
+
+      <div class="grid-3" id="sessions-grid">
+        <div class="loading">Loading sessions...</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Jitsi Video Call Modal -->
+  <div id="jitsi-modal">
+    <div id="jitsi-container"></div>
+    <button id="close-jitsi-btn" onclick="closeJitsi()">End Call & Close</button>
+  </div>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" id="review-modal">
+    <div class="modal-box">
+      <h2>⭐ Leave a Review</h2>
+      <p class="text-muted" id="review-for-name"></p>
+      <form id="review-form">
+        <div class="field">
+          <label>Rating</label>
+          <div class="star-picker" id="star-picker">
+            <span data-v="1">&#9733;</span><span data-v="2">&#9733;</span><span data-v="3">&#9733;</span><span data-v="4">&#9733;</span><span data-v="5">&#9733;</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Comment</label>
+          <textarea id="review-comment" rows="3" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;resize:vertical" placeholder="How was the session?"></textarea>
+        </div>
+        <div class="flex gap-12 mt-16">
+          <button type="button" class="btn btn-ghost" onclick="closeReviewModal()">Cancel</button>
+          <button type="submit" class="btn">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Schedule / Reschedule Modal -->
+  <div class="modal-overlay" id="schedule-modal">
+    <div class="modal-box">
+      <h2>📅 Schedule Session</h2>
+      <p class="text-muted" id="schedule-for-name"></p>
+      <div class="field">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="schedule-dt">
+      </div>
+      <div class="field">
+        <label>Duration (minutes)</label>
+        <select id="schedule-dur" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none">
+          <option value="30">30 min</option>
+          <option value="60" selected>1 hour</option>
+          <option value="90">1.5 hours</option>
+          <option value="120">2 hours</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="schedule-notes" rows="2" style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;resize:vertical" placeholder="What will you cover?"></textarea>
+      </div>
+      <div class="flex gap-12 mt-16">
+        <button type="button" class="btn btn-ghost" onclick="closeScheduleModal()">Cancel</button>
+        <button type="button" class="btn" onclick="saveSchedule()">💾 Save & Generate Meet Link</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/sessions.js"></script>
+  <script>
+    let jitsiAPI = null;
+    function openJitsi(roomName) {
+      document.getElementById('jitsi-modal').style.display = 'flex';
+      const domain = 'meet.jit.si';
+      const options = {
+          roomName: roomName,
+          width: '100%',
+          height: '100%',
+          parentNode: document.querySelector('#jitsi-container'),
+          userInfo: {
+              displayName: getCurrentUser().name
+          }
+      };
+      jitsiAPI = new JitsiMeetExternalAPI(domain, options);
+    }
+    
+    function closeJitsi() {
+      if (jitsiAPI) {
+        jitsiAPI.dispose();
+        jitsiAPI = null;
+      }
+      document.getElementById('jitsi-modal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# Dependencies
+
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+
+.env
+.env.*
+!.env.example
+
+# Build output
+
+dist/
+build/
+
+# Cache and temporary files
+
+.cache/
+*.log
+coverage/
+
+# Operating system files
+
+.DS_Store
+Thumbs.db

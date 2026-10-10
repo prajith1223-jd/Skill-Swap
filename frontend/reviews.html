@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="reviews">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>Reviews</h1>
+          <p>Feedback from your skill exchange partners</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-type="received">Received</div>
+        <div class="tab" data-type="given">Given by me</div>
+      </div>
+
+      <div id="reviews-list" class="grid-3">
+        <div class="loading">Loading reviews...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/reviews.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Signing in... · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
+  .oauth-box { text-align:center; padding:48px; }
+  .spinner { width:48px; height:48px; border:4px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 24px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .oauth-box h2 { margin:0 0 8px; font-size:22px; }
+  .oauth-box p  { color:var(--text-muted); font-size:14px; }
+</style>
+</head>
+<body>
+  <div class="oauth-box" id="loading-state">
+    <div class="spinner"></div>
+    <h2>Signing you in…</h2>
+    <p>Please wait while we complete your Google sign-in.</p>
+  </div>
+
+  <div class="oauth-box" id="error-state" style="display:none">
+    <div style="font-size:48px;margin-bottom:16px">❌</div>
+    <h2>Sign-in Failed</h2>
+    <p id="error-msg">Something went wrong. Please try again.</p>
+    <a href="index.html" class="btn" style="margin-top:20px;display:inline-block">Back to Login</a>
+  </div>
+
+<script src="js/api.js"></script>
+<script>
+  (function() {
+    const params  = new URLSearchParams(window.location.search);
+    const error   = params.get('error');
+    const token   = params.get('token');
+    const userRaw = params.get('user');
+    const next    = params.get('next') || 'dashboard.html';
+
+    function showError(msg) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-state').style.display   = 'block';
+      document.getElementById('error-msg').textContent       = msg;
+    }
+
+    if (error || !token || !userRaw) {
+      showError(error === 'oauth_failed'
+        ? 'Google sign-in was cancelled or failed.'
+        : 'Invalid response from server.');
+      return;
+    }
+
+    try {
+      const user = JSON.parse(decodeURIComponent(userRaw));
+      saveSession(token, user);
+
+      // Always redirect using absolute URL + ensure .html extension
+      const base = window.location.origin; // e.g. http://localhost:5500
+      let page = next.endsWith('.html') ? next : (next + '.html');
+      const flow = sessionStorage.getItem('oauth_flow');
+      if (user.is_profile_setup === false && flow === 'signup') {
+        page = 'register.html?step=2';
+      }
+
+      window.location.replace(base + '/' + page);
+
+    } catch (e) {
+      showError('Failed to complete sign-in: ' + e.message);
+    }
+  })();
+</script>
+</body>
+</html>

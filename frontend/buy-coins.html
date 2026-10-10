@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buy Coins - SkillSwap</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    
+    .pricing-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px 24px;
+      text-align: center;
+      border: 2px solid var(--border);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .pricing-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+    
+    .pricing-card.popular {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+    
+    .pricing-card.popular:hover {
+      transform: scale(1.02) translateY(-8px);
+    }
+    
+    .popular-badge {
+      position: absolute;
+      top: 16px;
+      right: -32px;
+      background: var(--accent);
+      color: white;
+      padding: 4px 32px;
+      transform: rotate(45deg);
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .coin-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .package-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .package-price {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    
+    .package-price span {
+      font-size: 18px;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    
+    .package-desc {
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    /* Payment Modal Styles */
+    .payment-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .payment-modal.open {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .payment-box {
+      background: var(--bg);
+      padding: 32px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+    }
+    
+    .processing-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+    
+    .success-checkmark {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 24px;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn { 
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body data-page="buy-coins">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    
+    <main class="main">
+      <div id="topbar-slot"></div>
+      
+      <div class="page-container fade-in" style="padding: 24px;">
+      <div style="text-align: center; margin-bottom: 48px; margin-top: 24px;">
+        <h1 style="font-size: 36px; margin-bottom: 12px;">Top Up Your Skill Coins 🪙</h1>
+        <p class="text-muted" style="font-size: 18px; max-width: 600px; margin: 0 auto;">
+          Run out of coins? No problem! Purchase more Skill Coins instantly to continue sending exchange requests to other talented members.
+        </p>
+      </div>
+
+      <div class="pricing-grid">
+        <!-- Starter Package -->
+        <div class="pricing-card">
+          <div class="coin-icon">🪙</div>
+          <div class="package-name">Starter Pack</div>
+          <div class="package-price">$4.99</div>
+          <div class="package-desc">Get <b>5 Skill Coins</b> to kickstart your learning journey. Perfect for trying out the platform!</div>
+          <button class="btn btn-outline" style="width: 100%; border-radius: 8px; padding: 12px;" onclick="startPayment(5, 4.99, 'Starter Pack')">Buy 5 Coins</button>
+        </div>
+
+        <!-- Pro Package (Popular) -->
+        <div class="pricing-card popular">
+          <div class="popular-badge">Best Value</div>
+          <div class="coin-icon">💰</div>
+          <div class="package-name">Pro Learner</div>
+          <div class="package-price">$12.99</div>
+          <div class="package-desc">Get <b>15 Skill Coins</b> to master multiple new skills. Our most popular choice!</div>
+          <button class="btn" style="width: 100%; border-radius: 8px; padding: 12px; background: var(--accent); color: white;" onclick="startPayment(15, 12.99, 'Pro Learner')">Buy 15 Coins</button>
+        </div>
+
+        <!-- Master Package -->
+        <div class="pricing-card">
+          <div class="coin-icon">👑</div>
+          <div class="package-name">Master Class</div>
+          <div class="package-price">$39.99</div>
+          <div class="package-desc">Get <b>50 Skill Coins</b>. Never worry about running out of coins for your skill exchanges again.</div>
+          <button class="btn btn-outline" style="width: 100%; border-radius: 8px; padding: 12px;" onclick="startPayment(50, 39.99, 'Master Class')">Buy 50 Coins</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="payment-modal" id="payment-modal">
+    <div class="payment-box" id="payment-content" style="max-width: 500px; padding: 24px;">
+      <!-- Dynamic content injected here -->
+    </div>
+  </div>
+
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/buy-coins.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Requests · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="requests">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>Exchange Requests</h1>
+          <p>Manage incoming and outgoing skill exchange requests</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" data-type="incoming">Incoming</div>
+        <div class="tab" data-type="outgoing">Outgoing</div>
+      </div>
+
+      <div class="card" style="padding:0;">
+        <div id="requests-list"><div class="loading">Loading requests...</div></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/requests.js"></script>
+</body>
+</html>

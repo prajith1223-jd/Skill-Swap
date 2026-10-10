@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Skills · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="browse-skills">
+  <div class="app-shell">
+    <div id="sidebar-slot"></div>
+    <main class="main">
+      <div id="topbar-slot"></div>
+
+      <div class="page-head">
+        <div>
+          <h1>Browse Skills</h1>
+          <p>Discover and request skill exchanges from our community</p>
+        </div>
+        <button class="btn" onclick="openOfferModal()">+ Offer a Skill</button>
+      </div>
+
+      <div class="filter-bar card">
+        <div class="search-input">
+          <span>&#128269;</span>
+          <input id="search-input" placeholder="Search skills, tags, or people...">
+        </div>
+        <select id="level-filter">
+          <option value="All Levels">All Levels</option>
+          <option value="Beginner">Beginner</option>
+          <option value="Intermediate">Intermediate</option>
+          <option value="Advanced">Advanced</option>
+          <option value="All Levels">All Levels only</option>
+        </select>
+        <select id="sort-filter">
+          <option value="rating">Highest Rated</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+
+      <div class="chip-row" id="category-chips">
+        <div class="chip active" data-cat="All">All</div>
+      </div>
+
+      <div class="grid-3" id="skills-grid">
+        <div class="loading">Loading skills...</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Offer a Skill modal -->
+  <div class="modal-overlay" id="offer-modal">
+    <div class="modal-box">
+      <h2>Offer a Skill</h2>
+      <form id="offer-form">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" id="skill-title" placeholder="e.g. React & TypeScript" required>
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="skill-category" required></select>
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <select id="skill-level">
+            <option>Beginner</option>
+            <option>Intermediate</option>
+            <option>Advanced</option>
+            <option>All Levels</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <textarea id="skill-description" rows="3" placeholder="What will you teach?"></textarea>
+        </div>
+        <div class="field">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="skill-tags" placeholder="React, TypeScript, Next.js">
+        </div>
+        <div class="flex gap-12 mt-16">
+          <button type="button" class="btn btn-ghost" onclick="closeOfferModal()">Cancel</button>
+          <button type="submit" class="btn">Publish Skill</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Request Exchange modal -->
+  <div class="modal-overlay" id="request-modal">
+    <div class="modal-box">
+      <h2>Request Exchange</h2>
+      <p class="text-muted" id="request-skill-name"></p>
+      <form id="request-form">
+        <div class="field mt-16">
+          <label>Offer Type</label>
+          <div style="display:flex;gap:16px;margin-top:8px;">
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:var(--text);">
+              <input type="radio" name="offer_type" value="trade" checked> Propose a Skill Trade
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:var(--text);">
+              <input type="radio" name="offer_type" value="coin"> Pay 1 Skill Coin
+            </label>
+          </div>
+        </div>
+        <div class="field mt-16">
+          <label>Message</label>
+          <textarea id="request-message" rows="4" placeholder="Introduce yourself and what you'd like to learn..."></textarea>
+        </div>
+        <div class="flex gap-12 mt-24">
+          <button type="button" class="btn btn-ghost" onclick="closeRequestModal()">Cancel</button>
+          <button type="submit" class="btn">Send Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth-guard.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/browse-skills.js"></script>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up · SkillSwap</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── Social Login ── */
+.social-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text-muted);font-size:13px}
+.social-divider::before,.social-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.btn-social{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px 16px;border-radius:10px;border:1.5px solid var(--border);background:white;font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;transition:background .15s,box-shadow .15s;cursor:pointer}
+.btn-social:hover{background:#f8f8ff;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.btn-social img{width:20px;height:20px}
+
+/* ── Step indicators ── */
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px}
+.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;border:2px solid var(--border);color:var(--text-muted);background:white;transition:all .3s;flex-shrink:0}
+.step-dot.done{background:var(--success);border-color:var(--success);color:white}
+.step-dot.active{background:var(--accent);border-color:var(--accent);color:white}
+.step-line{flex:1;height:2px;background:var(--border);min-width:30px;transition:background .3s}
+.step-line.done{background:var(--success)}
+
+/* ── Profile setup card ── */
+.setup-card{max-width:480px}
+.setup-field{display:flex;align-items:center;gap:12px;background:#1e2a3a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;margin-bottom:12px;color:white;cursor:pointer;transition:border-color .2s}
+.setup-field:hover,.setup-field:focus-within{border-color:var(--accent)}
+.setup-field .sf-icon{font-size:18px;opacity:.7;flex-shrink:0}
+.setup-field input,.setup-field textarea,.setup-field select{background:transparent;border:none;outline:none;color:white;font-size:14.5px;font-family:inherit;flex:1;min-width:0}
+.setup-field input::placeholder,.setup-field textarea::placeholder{color:rgba(255,255,255,0.4)}
+.setup-field textarea{resize:none;min-height:70px}
+.setup-field select option{background:#1e2a3a;color:white}
+.setup-field .sf-arrow{color:rgba(255,255,255,0.4);font-size:14px;margin-left:auto;flex-shrink:0}
+.setup-avatar-box{display:flex;align-items:center;gap:14px;background:#1e2a3a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;margin-bottom:16px;color:white;cursor:pointer;flex-direction:column;text-align:center}
+.setup-avatar-box .av-label{font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.av-circle{width:72px;height:72px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;margin:0 auto;overflow:hidden}
+.av-circle img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.setup-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f1923 0%,#1a2940 100%);padding:20px}
+.setup-card-inner{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);border-radius:20px;padding:36px;width:100%;max-width:650px}
+.setup-title{color:white;font-size:22px;font-weight:800;text-align:center;margin-bottom:6px}
+.setup-sub{color:rgba(255,255,255,.5);font-size:13px;text-align:center;margin-bottom:24px}
+
+/* Multi-select chips for skills / languages */
+.chip-select{background:#1e2a3a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:12px;color:white}
+.chip-select .cs-label{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chip-select .cs-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cs-chip{padding:5px 12px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.2);font-size:12.5px;font-weight:600;cursor:pointer;color:rgba(255,255,255,.7);transition:all .15s}
+.cs-chip.selected{background:var(--accent);border-color:var(--accent);color:white}
+.cs-chip:hover{border-color:var(--accent);color:white}
+.continue-btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:6px}
+.continue-btn.active{background:linear-gradient(135deg,#5b4bd1,var(--accent));color:white}
+.continue-btn.inactive{background:rgba(255,255,255,.1);color:rgba(255,255,255,.4);cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ STEP 1: Register ════════════════ -->
+<div id="step1" class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-logo"><img src="assets/logo.svg" class="icon" alt="Logo"> SkillSwap</div>
+    <div class="auth-sub">Create your account and start swapping skills.</div>
+
+    <!-- Step indicator -->
+    <div class="steps">
+      <div class="step-dot active" id="dot1">1</div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-dot" id="dot2">2</div>
+    </div>
+
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Social login buttons -->
+    <button type="button" class="btn-social" id="google-btn" onclick="googleLogin()">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+      Continue with Google
+    </button>
+
+    <div class="social-divider">or sign up with email</div>
+
+    <form id="register-form">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Jane Doe" required>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="At least 4 characters" required autocomplete="new-password">
+      </div>
+      <button type="submit" class="btn btn-block" id="submit-btn">Create Account &rarr;</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="index.html" style="color:var(--accent);font-weight:700;">Log in</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ STEP 2: Profile Setup ════════════════ -->
+<div id="step2" style="display:none" class="setup-wrap">
+  <div class="setup-card-inner">
+    <div class="setup-title">Set Up Your Profile</div>
+    <div class="setup-sub">Help others know what you can teach and learn</div>
+
+    <!-- Step indicator -->
+    <div class="steps" style="margin-bottom:24px">
+      <div class="step-dot done">✓</div>
+      <div class="step-line done"></div>
+      <div class="step-dot active">2</div>
+    </div>
+
+    <!-- Name (pre-filled) -->
+    <div class="setup-field">
+      <span class="sf-icon">👤</span>
+      <input type="text" id="setup-name" placeholder="Your name">
+    </div>
+
+    <!-- Bio -->
+    <div class="setup-field">
+      <span class="sf-icon">💬</span>
+      <textarea id="setup-bio" placeholder="Short bio — what you do, your experience..."></textarea>
+    </div>
+
+    <!-- Skills to teach -->
+    <div class="chip-select">
+      <div class="cs-label"><span>📊</span> Skills you want to teach* <span class="sf-arrow">&#8964;</span></div>
+      <div class="cs-chips" id="teach-chips"></div>
+    </div>
+
+    <!-- Skills to learn -->
+    <div class="chip-select">
+      <div class="cs-label"><span>💼</span> Skills you want to learn* <span class="sf-arrow">&#8964;</span></div>
+      <div class="cs-chips" id="learn-chips"></div>
+    </div>
+
+    <!-- Languages -->
+    <div class="chip-select">
+      <div class="cs-label"><span>🌐</span> Languages you speak* <span class="sf-arrow">&#8964;</span></div>
+      <div class="cs-chips" id="lang-chips"></div>
+    </div>
+
+    <!-- Avatar -->
+    <div class="setup-avatar-box" onclick="document.getElementById('avatar-input').click()">
+      <div class="av-label"><span>⬆️</span> Profile photo — click to change</div>
+      <div class="av-circle" id="av-preview">
+        <span id="av-initials"></span>
+      </div>
+      <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+    </div>
+
+    <button class="continue-btn inactive" id="continue-btn" onclick="finishSetup()">Continue</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px;color:rgba(255,255,255,.5)" onclick="skipSetup()">Skip for now</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+  // ── Google OAuth ─────────────────────────────────────────────────────────
+  function googleLogin() {
+    sessionStorage.setItem('oauth_flow', 'signup');
+    window.location.href = 'http://localhost:5000/api/auth/google';
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isStep2 = urlParams.get('step') === '2';
+
+  if (sessionStorage.getItem('skillswap_token') && !isStep2) {
+    location.href = 'dashboard.html';
+  }
+
+  const SKILLS_LIST = [
+    'Programming','Web Development','Mobile Development','Data Science','Machine Learning',
+    'Cybersecurity','Cloud Computing','DevOps','UI/UX Design','Graphic Design',
+    'Photography','Music','Guitar','Piano','Language','Spanish','French','Japanese',
+    'Marketing','Content Writing','Business','Finance','Fitness','Cooking','Drawing'
+  ];
+  const LANGS_LIST = ['English','Hindi','Tamil','Telugu','Spanish','French','German','Japanese','Arabic','Chinese','Portuguese','Korean'];
+
+  let _tempToken = null;
+  let _tempUser  = null;
+  let teachSelected = new Set();
+  let learnSelected = new Set();
+  let langSelected  = new Set();
+
+  // ── Auto-start Step 2 if redirected from OAuth ──────────────────────────────
+  if (isStep2) {
+    const savedUser = JSON.parse(sessionStorage.getItem('skillswap_user') || '{}');
+    _tempToken = sessionStorage.getItem('skillswap_token');
+    _tempUser = savedUser;
+    goToStep2(savedUser);
+  }
+
+  // ── Step 1: Register ────────────────────────────────────────────────────────
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('error-box');
+    const submitBtn = document.getElementById('submit-btn');
+    errorBox.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account...';
+
+    try {
+      const { token, user } = await api('/auth/register', {
+        method: 'POST',
+        body: {
+          name: document.getElementById('name').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value
+        }
+      });
+      _tempToken = token;
+      _tempUser  = user;
+      goToStep2(user);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.style.display = 'block';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account →';
+    }
+  });
+
+  // ── Step 2: Profile Setup ───────────────────────────────────────────────────
+  function goToStep2(user) {
+    document.getElementById('step1').style.display = 'none';
+    document.getElementById('step2').style.display = '';
+
+    document.getElementById('setup-name').value = user.name || '';
+    const initials = (user.name || 'U').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('av-initials').textContent = initials;
+
+    buildChips('teach-chips', SKILLS_LIST, teachSelected);
+    buildChips('learn-chips', SKILLS_LIST, learnSelected);
+    buildChips('lang-chips', LANGS_LIST, langSelected);
+  }
+
+  function buildChips(containerId, list, selectedSet) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = list.map(item => `
+      <span class="cs-chip ${selectedSet.has(item) ? 'selected' : ''}" onclick="toggleChip(this,'${item}','${containerId}')">${item}</span>
+    `).join('');
+  }
+
+  function toggleChip(el, value, containerId) {
+    const setMap = { 'teach-chips': teachSelected, 'learn-chips': learnSelected, 'lang-chips': langSelected };
+    const set = setMap[containerId];
+    if (set.has(value)) { set.delete(value); el.classList.remove('selected'); }
+    else { set.add(value); el.classList.add('selected'); }
+    updateContinueBtn();
+  }
+
+  function updateContinueBtn() {
+    const btn = document.getElementById('continue-btn');
+    const valid = teachSelected.size > 0 && learnSelected.size > 0 && langSelected.size > 0;
+    btn.className = 'continue-btn ' + (valid ? 'active' : 'inactive');
+  }
+
+  function previewAvatar(input) {
+    if (!input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('av-preview').innerHTML = `<img src="${e.target.result}" alt="avatar">`;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  async function finishSetup() {
+    if (teachSelected.size === 0 || learnSelected.size === 0 || langSelected.size === 0) return;
+
+    const btn = document.getElementById('continue-btn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    // Save token first so api() can use it
+    sessionStorage.setItem('skillswap_token', _tempToken);
+    sessionStorage.setItem('skillswap_user', JSON.stringify(_tempUser));
+
+    try {
+      const bio = document.getElementById('setup-bio').value.trim();
+      const name = document.getElementById('setup-name').value.trim();
+
+      // Update profile with bio and name
+      await api('/users/me', {
+        method: 'PUT',
+        body: { name, bio: `${bio}\n\n🎓 Teaches: ${[...teachSelected].join(', ')}\n📚 Learns: ${[...learnSelected].join(', ')}\n🌐 Languages: ${[...langSelected].join(', ')}` }
+      });
+
+      // Create teach skills automatically
+      const cats = await api('/categories');
+      const catMap = {};
+      cats.forEach(c => catMap[c.name] = c._id);
+
+      for (const skill of teachSelected) {
+        try {
+          const catId = catMap[skill] || cats[0]._id;
+          await api('/skills', {
+            method: 'POST',
+            body: { title: skill, description: `I can teach ${skill}`, level: 'All Levels', category_id: catId, tags: [skill.toLowerCase()] }
+          });
+        } catch(e) { /* ignore duplicates */ }
+      }
+
+      // Upload avatar if selected
+      const avatarInput = document.getElementById('avatar-input');
+      if (avatarInput.files && avatarInput.files[0]) {
+        const formData = new FormData();
+        formData.append('avatar', avatarInput.files[0]);
+        const { avatar_url } = await api('/users/me/avatar', {
+          method: 'POST',
+          body: formData
+        });
+        _tempUser.avatar_url = avatar_url;
+        sessionStorage.setItem('skillswap_user', JSON.stringify(_tempUser));
+      }
+
+      sessionStorage.setItem('skillswap_new_user', 'true');
+      location.href = 'dashboard.html';
+    } catch (err) {
+      alert('Could not save profile: ' + err.message);
+      btn.textContent = 'Continue';
+      btn.disabled = false;
+    }
+  }
+
+  function skipSetup() {
+    saveSession(_tempToken, _tempUser);
+    sessionStorage.setItem('skillswap_new_user', 'true');
+    location.href = 'dashboard.html';
+  }
+</script>
+</body>
+</html>
